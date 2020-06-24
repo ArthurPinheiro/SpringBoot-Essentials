@@ -12,48 +12,50 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController // Já vem com o responseBody. Ou seja, já devolve o json como resultado, no corpo da requisição
-@RequestMapping("students")
+@RequestMapping("v1")
 public class StudentEndpoint {
 
     private final StudentRepository dao;
+
+    public StudentEndpoint(){this(null);}
 
     @Autowired
     private StudentEndpoint(StudentRepository dao){
         this.dao = dao;
     }
 
-    @GetMapping
+    @GetMapping(path = "protected/students")
     public ResponseEntity<?> listAll(Pageable pageable){
         return new ResponseEntity<>(dao.findAll(pageable), HttpStatus.OK);
     }
 
-    @GetMapping(path = "/{id}")
+    @GetMapping(path = "protected/students/{id}")
     public ResponseEntity<?> getStudentById(@PathVariable("id") Long id){
         verifyIfStudentExists(id);
         Student student = dao.findOne(id);
         return new ResponseEntity<>(student,HttpStatus.OK);
     }
 
-    @GetMapping(path = "/findByName/{name}")
+    @GetMapping(path = "protected/students/findByName/{name}")
     public ResponseEntity<?> findStudentsByName(@PathVariable String name){
         dao.findByNameIgnoreCaseContaining(name);
         return new ResponseEntity<>(name, HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping(path = "admin/students")
     public ResponseEntity<?> save(@Valid @RequestBody Student student){
         dao.save(student);
         return new ResponseEntity<>(student, HttpStatus.OK);
     }
 
-    @PutMapping
+    @PutMapping(path = "admin/students")
     public ResponseEntity<?> update(@RequestBody Student student){
         verifyIfStudentExists(student.getId());
         dao.save(student);
         return new ResponseEntity<>(student, HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "/{id}")
+    @DeleteMapping(path = "admin/students/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id){
         verifyIfStudentExists(id);
         dao.delete(id);
